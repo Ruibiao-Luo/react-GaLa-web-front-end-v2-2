@@ -40,7 +40,7 @@ function Register() {
     // 使用Axios库发送HTTP请求
     axios
       .post(
-        "http://60.205.202.47:8002/users/register",
+        "https://60.205.202.47:8002/users/register",
         {
           username,
           password,
