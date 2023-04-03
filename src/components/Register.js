@@ -37,10 +37,11 @@ function Register() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // 使用Axios库发送HTTP请求
+    // 使用Axios库发送HTTPS请求
     axios
       .post(
-        "http://60.205.202.47:8002/users/register",
+        //"https://60.205.202.47:8002/users/register",
+        "https://www.eeoaa.com:8000/users/register",
         {
           username,
           password,

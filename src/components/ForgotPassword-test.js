@@ -54,12 +54,14 @@ class ForgotPassword extends Component {
       .post(url, { email, code })
       .then((response) => {
         this.setState({
+          message: response.data.message,
           passwordError: false,
           codeError: false,
         });
       })
       .catch((error) => {
         this.setState({
+          message: error.response.data.message,
           passwordError: true,
           codeError: true,
         });
@@ -169,17 +171,22 @@ class ForgotPassword extends Component {
       <div className="forgot-password-container">
         <h2>Reset Password</h2>
         <form onSubmit={this.handleSubmitCode}>
-          <label>
-            Verification Code:
+           <div className="forgot-input-wrapper">
             <input
-              type="text"
-              name="code"
-              value={code}
+              type="email"
+              placeholder="请输入注册邮箱"
+              id="email"
+              name="email"
+              value={email}
               onChange={this.handleChange}
               required
+              className="forgot-input"
             />
-          </label>
-          <button type="submit">Verify Code</button>
+            <label htmlFor="email"></label>
+          </div>
+          <button type="submit"  className="forgot-button">
+            Verify Code
+          </button>
           {codeError && (
             <p className="error-message">Invalid code. Please try again.</p>
           )}
