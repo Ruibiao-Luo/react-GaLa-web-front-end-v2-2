@@ -44,15 +44,16 @@ function Register() {
         "https://www.eeoaa.com:8000/users/register",
         {
           username,
-          password,
-          confirmPassword,
-          email,
-          gender,
+          //password,
+          //confirmPassword,
+          //email,
+          //gender,
         },
         {
-          withCredentials: true,
+          //withCredentials: true,
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json;charset=UTF-8",
+            "username":"luorb1",
           },
         }
       )

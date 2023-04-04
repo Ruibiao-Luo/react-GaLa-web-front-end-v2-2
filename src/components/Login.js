@@ -25,7 +25,7 @@ class Login extends Component {
     e.preventDefault();
     const { username, password } = this.state;
     // Replace with your own API URL
-    const url = "https://example.com/api/login";
+    const url = "https://www.eeoaa.com:8000/users/auth";
     axios
       .post(url, { username, password })
       .then((response) => {

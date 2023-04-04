@@ -14,10 +14,17 @@ import { yupResolver } from "@hookform/resolvers/yup";
 const axiosInstance = axios.create({
   baseURL: "https://www.eeoaa.com:8000",
   headers: {
-    "Content-Type": "application/x-www-form-urlencoded", // 使用表单格式
-    //"Content-Type": "application/json",
+    //"Content-Type": "application/x-www-form-urlencoded", // 使用表单格式
+    "Content-Type": "application/json;charset=UTF-8",
     //"X-Content-Type-Options": "nosniff",
   },
+  body: JSON.stringify({
+    username: "zhong",
+    password: "asdf",
+    confirmedPassword: "asdf",
+    email: "1234@qq.com",
+    sex: "male",
+  }),
 });
 
 // 创建一个表单数据的规则和约束
@@ -29,7 +36,7 @@ const schema = yup.object().shape({
     .required("确认密码不能为空")
     .oneOf([yup.ref("password"), null], "两次密码不一致"),
   email: yup.string().required("邮箱不能为空").email("邮箱格式不正确"),
-  gender: yup.string().required("性别不能为空"),
+  sex: yup.string().required("性别不能为空"),
 });
 
 function Register() {
@@ -42,19 +49,23 @@ function Register() {
 
   // 定义一个提交表单的异步函数，使用async/await语法
   const onSubmit = async (data) => {
+    //const {username}=data
     try {
+      
       // 获取token和username
-      const token = localStorage.getItem("token");
+      //const token = localStorage.getItem("token");
       //const username = localStorage.getItem("username");
 
       // 把token和username添加到表单数据中
-      data.token = token;
+      //data.token = token;
       //data.username = username;
 
       // 使用Axios实例发送POST请求，传入表单数据
-      const response = await axiosInstance.post("/users/register", data);
+      const response = await axiosInstance.post(
+        "/users/register",
+        data
+      );
       console.log(response.data);
-
       alert("注册成功！");
       // 在这里添加成功的提示信息
     } catch (error) {
@@ -111,12 +122,12 @@ function Register() {
           {errors.email && <p className="error">{errors.email.message}</p>}
         </div>
         <div className="input-wrapper">
-          <select title="性别" id="gender" {...register("gender")}>
+          <select title="性别" id="sex" {...register("sex")}>
             <option value="">性别</option>
             <option value="male">男</option>
             <option value="female">女</option>
           </select>
-          {errors.gender && <p className="error">{errors.gender.message}</p>}
+          {errors.sex && <p className="error">{errors.sex.message}</p>}
         </div>
         <button type="submit" className="login-button">
           {" "}
