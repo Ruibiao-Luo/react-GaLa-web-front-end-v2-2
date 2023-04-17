@@ -20,9 +20,9 @@ const questions = [
     question: "这个星系有什么特殊特征吗?",
     options: [
       "引力透镜/弧状",
-      "并合星系",
-      "环星系/车轮星系",
-      "潮汐扰动",
+      "并合星系/潮汐扰动",
+      "环星系/车轮星系/霍格天体",
+      "低表面亮度星系/极弥散星系",
       "其它",
       "无特征",
     ],
@@ -92,10 +92,10 @@ const SeleCard = () => {
         ))}
       </div>
       <div className="button-section">
-        <button 
-        className="button-step" 
-        onClick={handlePrevClick} 
-        disabled={currentQuestion === 0}
+        <button
+          className="button-step"
+          onClick={handlePrevClick}
+          disabled={currentQuestion === 0}
         >
           上一步
         </button>
