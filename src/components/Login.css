@@ -97,6 +97,7 @@ button[type='submit']:hover {
 }
 
 .login-button {
+  font-family: "Noto Sans SC", sans-serif;  
   background-color: #5f5cf2;
   color: #fff;
   border-radius: 25px;
@@ -107,9 +108,16 @@ button[type='submit']:hover {
 }
 
 .signup-button {
+  font-family: "Noto Sans SC", sans-serif;  
   background-color: transparent;
   color: #000;
   border: none;
   font-size: 0.9rem;
   cursor: pointer;
+}
+
+.welcome-message {
+  border: 2px solid #333;
+  padding: 20px;
+  border-radius: 10px;
 }
