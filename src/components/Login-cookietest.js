@@ -56,6 +56,20 @@ const Login = () => {
   const { setUser } = useContext(UserContext);// 从全局上下文组件中获取用户数据状态和修改数据状态的方法
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // 添加cookie逻辑
+  useEffect(() => {
+    const token = document.cookie.replace(/(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/, "$1");
+    const expirationTime = document.cookie.replace(/(?:(?:^|.*;\s*)expirationTime\s*=\s*([^;]*).*$)|^.*$/, "$1");
+    if (token && expirationTime && new Date().getTime() < +expirationTime) {
+      setUser({
+        token: token,
+        role: "",
+      });
+      setIsLoggedIn(true);
+      setTokenExpirationDate(expirationTime);
+    }
+  }, [setUser]);
+
   const onSubmit = async (data) => {
     const requestBody = {
       username: data.username,
@@ -75,13 +89,11 @@ const Login = () => {
         new Date().getTime() + response.data.expiresIn * 1000;
       setTokenExpirationDate(expirationTime);
       setIsLoggedIn(true);
-      // 保存当前用户信息到localStorage
-      localStorage.setItem('currentUser', JSON.stringify({
-        username: response.username,
-        token: response.token,
-        expiresIn: response.data.expiresIn,
-        expirationTime: expirationTime,
-      }));
+
+      // 添加cookie功能：将令牌存储到cookie中并设置有效期
+      const cookieOptions = { path: '/', expires: new Date(expirationTime)};
+      document.cookie = `token=${response.token}; ${Object.entries(cookieOptions).map(([key, value]) => `${key}=${value}`).join('; ')}`;
+      document.cookie = `expirationTime=${expirationTime}; ${Object.entries(cookieOptions).map(([key, value]) => `${key}=${value}`).join('; ')}`;
 
       setMessage("登录成功！");
       history.push("/");
@@ -122,6 +134,8 @@ const Login = () => {
           localStorage.removeItem('currentUser');
           setIsLoggedIn(false);
           setTokenExpirationDate(null);
+          document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+          document.cookie = 'expirationTime=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
         }
       }
     }, 1000 * 60); //每分钟检查一次
@@ -133,6 +147,10 @@ const Login = () => {
     setUser({});// 设置用户状态为空对象{}
     setIsLoggedIn(false);// 设置已登录状态为false
     history.push("/login");// 页面重定向到登录页面
+
+    // 添加cookie功能：删除令牌
+    document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+    document.cookie = 'expirationTime=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
   };
   
   // 如果token已经过期，自动重新获取token并更新本地存储
@@ -168,6 +186,12 @@ const Login = () => {
               expirationTime: expirationTime,
             })
           ); // 保存到本地存储
+
+          // 添加cookie功能：将新的令牌存储到cookie中并设置有效期
+          const cookieOptions = { path: '/', expires: new Date(expirationTime)};
+          document.cookie = `token=${response.data.token}; ${Object.entries(cookieOptions).map(([key, value]) => `${key}=${value}`).join('; ')}`;
+          document.cookie = `expirationTime=${expirationTime}; ${Object.entries(cookieOptions).map(([key, value]) => `${key}=${value}`).join('; ')}`;
+
         });
     }
   }, [tokenExpirationDate, setUser]);
