@@ -62,8 +62,9 @@ function Register() {
       // 发送注册请求前先向服务器发送验证码邮件，等待callback
       const response = await axiosInstance.post("/users/register", data);
 
-      if (response.data.sendEmail === 1) {
+      if (response.data.msg === "success") {
         // 如果发送验证码成功，则显示邮箱验证码输入框，并让用户输入验证码
+        alert("验证码发送成功！");
         setShowEmailCodeInput(true);
       } else {
         alert("验证码发送失败，请重试！");
@@ -79,7 +80,7 @@ function Register() {
 
     try {
       // 校验邮箱验证码是否正确
-      const response = await axiosInstanceVerify.post("/users/register", data);
+      const response = await axiosInstanceVerify.post("/users/smsCode", data);
 
       if (response.data.msg === "success") {
         // 验证码校验通过，允许用户进行注册或登录
