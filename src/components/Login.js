@@ -7,7 +7,7 @@ import { UserContext } from "./UserContext"; // 引入全局上下文组件
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-//1. 使用 POST 方法在 request header 传输用户名和密码，在 Login.js 中通过 axios 发送请求。
+//1.使用 POST 方法在 request header 传输用户名和密码，在 Login.js 中通过 axios 发送请求。
 
 //2.如果登录成功，会返回一个带有 token 和 expires_in 的 JSON 对象；如果登录失败，则返回相应的错误信息，比如“用户名或密码错误”。
 

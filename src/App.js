@@ -6,7 +6,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
-  Switch,
+  Switch,//要注意最新版的页面跳转不用这个了，好像放到了路由Route里了
   Route,
   Redirect,
 } from "react-router-dom";
@@ -48,7 +48,7 @@ function App() {
       <Router>
         <Navbar currentUser={currentUser} />
         <Switch>
-          {isVisited ? null : (
+          {isVisited ? null : (//如果isVisited为false就重定向到home，可根据需求修改
             <Route exact path="/">
               <Redirect to="/home" />
             </Route>
