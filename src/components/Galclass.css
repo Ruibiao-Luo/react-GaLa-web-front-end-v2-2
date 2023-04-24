@@ -8,13 +8,14 @@
 
 .galclass-left {
   align-items: flex-end;
-  margin-right: 15px;
+  margin-right: 25px;
+  margin-top: 80px;
 }
 
 .galclass-right {
   align-items: flex-start;
-  margin-left: 15px;
-  margin-top: -180px;
+  margin-left: 25px;
+  margin-top: -330px;
 }
 
 @media screen and (max-width: 768px) {
@@ -32,7 +33,7 @@
 
 .galclass-left__prev,
 .galclass-left__next {
-  top: 65%;
+  top: 51.5%;
   position: absolute;
   z-index: 1;
   border: none;
@@ -43,7 +44,7 @@
 }
 
 .galclass-left__prev {
-  margin-left: 10px;
+  margin-left: 0px;
   background-image: url("/array_next.png");
   background-size: contain;
   background-repeat: no-repeat;
@@ -51,7 +52,7 @@
 }
 
 .galclass-left__next {
-  margin-left: 380px;
+  margin-left: 340px;
   background-image: url("/array_prev.png");
   background-size: contain;
   background-repeat: no-repeat;

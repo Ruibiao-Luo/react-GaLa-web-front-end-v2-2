@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import GalaxyCard from "./GalaxyCard";
-import SeleCard from "./SeleCard";
+import GalaxyCard from "./galclass/GalaxyCard";
+import SeleCard from "./galclass/SeleCard";
 import "./Galclass.css";
 
 const images = [

@@ -1,136 +1,210 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { UserContext } from "./UserContext";
 import "./Register.css";
-// 导入Axios库
-import axios from "axios";
-//import axiosInstance from "axios";
+import axios from "axios";// 导入Axios库
+import qs from "qs";//导入qs库，用于格式化请求体
+import { useForm } from "react-hook-form";// 导入React Hook Form库
+import { useHistory } from "react-router-dom";
+import * as yup from "yup";// 导入Yup库
+import { yupResolver } from "@hookform/resolvers/yup";
 
-/*const axiosInstance = axios.create({
-  baseURL: "http://60.205.202.47:8002",
-});*/
+const axiosInstance = axios.create({
+  baseURL: "https://www.eeoaa.com:8000",
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded",
+    //"X-Content-Type-Options": "nosniff",
+  }
+});
+
+const schema = yup.object().shape({
+  username: yup.string().required("用户名不能为空").min(6, "用户名至少6位"),
+  password: yup.string().required("密码不能为空").min(8, "密码至少8位"),
+  confirmedPassword: yup
+    .string()
+    .required("确认密码不能为空")
+    .oneOf([yup.ref("password"), null], "两次密码不一致"),
+  email: yup.string().required("邮箱不能为空").email("邮箱格式不正确"),
+  sex: yup.string().required("性别不能为空"),
+});
 
 function Register() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [email, setEmail] = useState("");
-  const [gender, setGender] = useState("");
+  const { register, handleSubmit, formState: { errors } } = useForm({ resolver: yupResolver(schema) });
+  
+  const { setCurrentUser } = useContext(UserContext);
+  const history = useHistory();
+  const [emailCode, setEmailCode] = useState(""); // 添加一个邮箱验证码状态
+  const [showEmailCodeInput, setShowEmailCodeInput] = useState(false); // 添加一个是否显示邮箱验证码输入框的状态
 
-  const handleUsernameChange = (event) => {
-    setUsername(event.target.value);
-  };
-
-  const handlePasswordChange = (event) => {
-    setPassword(event.target.value);
-  };
-
-  const handleConfirmPasswordChange = (event) => {
-    setConfirmPassword(event.target.value);
-  };
-
-  const handleEmailChange = (event) => {
-    setEmail(event.target.value);
-  };
-
-  const handleGenderChange = (event) => {
-    setGender(event.target.value);
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // 使用Axios库发送HTTPS请求
-    axios
-      .post(
-        //"https://60.205.202.47:8002/users/register",
-        "https://www.eeoaa.com:8000/users/register",
+  const onSubmit = async (data) => {
+    try {
+      // 发送注册请求前先向服务器发送验证码邮件，等待callback
+      const response = await axiosInstance.post(
+        "/users/register/code",
         {
-          username,
-          password,
-          confirmPassword,
-          email,
-          gender,
-        },
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "application/json",
-          },
+          username: data.username,
+          email: data.email,
         }
-      )
-      // 处理成功或失败的响应
-      .then((response) => {
-        console.log(response.data);
-        alert("注册成功！"); // 在这里添加成功的提示信息
-      })
-      .catch((error) => {
-        console.error(error);
-        alert("注册失败，请重试。"); // 在这里添加失败的提示信息
-      });
-    /*console.log(
-      `Username: ${username}, Password: ${password}, Confirm Password: ${confirmPassword}, Email: ${email}, Gender: ${gender}`
-    );*/
+      );
+      
+      if(response.data.sendEmail === 1){ // 如果发送验证码成功，则显示邮箱验证码输入框，并让用户输入验证码
+        setShowEmailCodeInput(true);
+      } else{
+        alert("验证码发送失败，请重试！");
+      }
+
+    } catch (error) {
+      console.error(error);
+      alert("网络错误，请稍后再试。");
+    }
+  };
+
+  const onEmailCodeSubmit = async (event) => {
+    event.preventDefault();
+
+    try {
+      // 校验邮箱验证码是否正确
+      const response = await axiosInstance.post(
+        "/users/register/code/check",
+        qs.stringify({// 使用qs库将请求体格式化为body格式
+          username: event.target.username.value,
+          email: event.target.email.value,
+          password: event.target.password.value,
+          smsCode: event.target.emailCode.value, // 用户填写的验证码
+        })
+      );
+
+      if(response.data.msg === "success"){ // 验证码校验通过，允许用户进行注册或登录
+        const registerResponse = await axiosInstance.post(
+          "/users/register",
+          qs.stringify({ // 使用qs库将请求体格式化为body格式
+            username: event.target.username.value,
+            password: event.target.password.value,
+            confirmedPassword: event.target.confirmedPassword.value,
+            email: event.target.email.value,
+            sex: event.target.sex.value,
+          })
+        );
+        console.log(registerResponse.data);
+        alert("注册成功！");
+        setCurrentUser(registerResponse.data);// 将当前用户设置为已登录状态     
+        history.push("/home");
+      } else{ // 验证码校验失败，提示用户重新输入验证码
+        alert(response.data.msg);
+        setShowEmailCodeInput(true);
+      }
+
+    } catch (error) {
+      console.error(error);
+      alert("注册失败，请重试。");
+    }
   };
 
   return (
     <div className="register-container">
       <video src="/videos/video-1.mp4" autoPlay loop muted />
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <h1>注册</h1>
         <div className="input-wrapper">
           <input
             placeholder="用户名"
             type="text"
             id="username"
-            value={username}
-            onChange={handleUsernameChange}
-            required
+            {...register("username")}
           />
+          {errors.username && (
+            <p className="error">{errors.username.message}</p>
+          )}
         </div>
         <div className="input-wrapper">
           <input
             placeholder="密码"
             type="password"
             id="password"
-            value={password}
-            onChange={handlePasswordChange}
-            required
+            {...register("password")}
           />
+          {errors.password && (
+            <p className="error">{errors.password.message}</p>
+          )}
         </div>
         <div className="input-wrapper">
           <input
             placeholder="确认密码"
             type="password"
-            id="confirm-password"
-            value={confirmPassword}
-            onChange={handleConfirmPasswordChange}
-            required
+            id="confirmedPassword"
+            {...register("confirmedPassword")}
           />
+          {errors.confirmedPassword && (
+            <p className="error">{errors.confirmedPassword.message}</p>
+          )}
         </div>
         <div className="input-wrapper">
           <input
             placeholder="邮箱"
             type="email"
             id="email"
-            value={email}
-            onChange={handleEmailChange}
-            required
+            {...register("email")}
           />
+          {errors.email && <p className="error">{errors.email.message}</p>}
         </div>
         <div className="input-wrapper">
-          <select
-            id="gender"
-            value={gender}
-            onChange={handleGenderChange}
-            required
-          >
+          <select title="性别" id="sex" {...register("sex")}>
             <option value="">性别</option>
             <option value="male">男</option>
             <option value="female">女</option>
           </select>
+          {errors.sex && <p className="error">{errors.sex.message}</p>}
         </div>
         <button type="submit" className="login-button">
-          注册
+          {" "}
+          注册{" "}
         </button>
       </form>
+
+      { showEmailCodeInput ? // 根据状态showEmailCodeInput来显示或隐藏邮箱验证码输入框
+        <form onSubmit={onEmailCodeSubmit} style={{ marginTop: "30px" }}>
+          <h1>邮箱验证码</h1>
+          <div className="input-wrapper">
+            <input
+              placeholder="用户名"
+              type="text"
+              id="username"
+              readOnly
+              defaultValue={errors.username ? "" : document.getElementById('username').value}
+            />
+          </div>
+          <div className="input-wrapper">
+            <input
+              placeholder="邮箱"
+              type="email"
+              id="email"
+              readOnly
+              defaultValue={errors.email ? "" : document.getElementById('email').value}
+            />
+          </div>
+          <div className="input-wrapper">
+            <input
+              placeholder="密码"
+              type="password"
+              id="password"
+              readOnly
+              defaultValue={errors.password ? "" : document.getElementById('password').value}
+            />
+          </div>
+          <div className="input-wrapper">
+            <input
+              placeholder="邮箱验证码"
+              type="text"
+              id="emailCode"
+              value={emailCode}
+              onChange={(event) => setEmailCode(event.target.value)}
+            />
+          </div>
+          <button type="submit" className="login-button">
+            {" "}
+            注册{" "}
+          </button>
+        </form> : null}
+
     </div>
   );
 }
